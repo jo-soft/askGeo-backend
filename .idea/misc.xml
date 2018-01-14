@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="EmacsSettings">
-    <option name="emacsPath" value="/usr/bin/emacs" />
-  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_3" default="false" project-jdk-name="Remote Python 3.6.3 Docker Compose (backend at [/home/johannes/src/askGeo/docker-compose.yml])" project-jdk-type="Python SDK" />
 </project>

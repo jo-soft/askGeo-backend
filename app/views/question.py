@@ -1,8 +1,17 @@
 from flask import Blueprint
 
-questions_bp = Blueprint('questions', __name__, url_prefix='/questions')
+from models.question import QuestionModel
+from views.model_base_view import BaseModelView
+
+questions_bp = Blueprint('/questions', __name__)
+questions_bp.record(lambda _: register())
 
 
-@questions_bp.route('/')
-def list():
-    return '', 200
+def register():
+    QuestionList.register(questions_bp, '/questions/', '/questions/<_id>')
+
+
+class QuestionList(BaseModelView):
+
+    def __init__(self):
+        super().__init__(QuestionModel)

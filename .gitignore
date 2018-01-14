@@ -4,5 +4,7 @@
 
 .idea/
 mongoDb/
-package-lock.json
-
+package-lock.jsonk
+app/config_local.py
+**/__pycache__/
+**/*.pyc
