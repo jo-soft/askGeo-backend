@@ -1,4 +1,7 @@
 from flask_restful import Resource
+from marshmallow import Schema, fields, post_load
+from marshmallow.utils import _Missing
+
 from models.db import get_db
 
 
@@ -24,8 +27,8 @@ class Manager(object):
         return map(lambda data: self.content_class(data), raw_data)
 
     def save(self, item):
-        raw_data = item.serialize()
-        upsert_result = self.db_table.update_one({'_id': item._id}, update=raw_data, upsert=True)
+        update_data_with_operator = {"$set": item.serialize()}
+        upsert_result = self.db_table.update_one({'_id': item._id}, update=update_data_with_operator, upsert=True)
         if upsert_result.upserted_id:
             hex_id = upsert_result.upserted_id.binary.hex()
             item._id = hex_id
@@ -42,15 +45,39 @@ class Manager(object):
 
 
 class ModelBase(Resource):
+    @classmethod
+    def get_scheme(cls, class_to_create):
+        class BaseSchema(Schema):
+            # allow none for new items
+            _id = fields.Integer(allow_none=True)
+            deleted = fields.Boolean(default=False)
+
+            @post_load
+            def make_instance(self, data):
+                return class_to_create(**data)
+
+        return BaseSchema
 
     @classmethod
     def manager(cls):
         return Manager(cls)
 
-    def __init__(self, _id=None, deleted=False):
+    def __init__(self, **kwargs):
         super().__init__()
-        self._id = _id
-        self._deleted_ = deleted
+
+        # iterate
+        for field_name, field in self.__class__.get_scheme(self.__class__)._declared_fields.items():
+            try:
+                getattr(self, field_name)
+            except AttributeError:
+                val = kwargs.get(field_name)
+                if val is None:
+                    if field.allow_none:
+                        if not isinstance(field.default, _Missing):
+                            val = field.default
+                    else:
+                        raise AttributeError(field_name)
+                setattr(self, field_name, val)
 
     def deleted(self, val=None):
         if val is not None:
@@ -58,7 +85,7 @@ class ModelBase(Resource):
         return self._deleted_
 
     def serialize(self):
-        return {
-            '_id': self._id,
-            'deleted': self.deleted()
-        }
+        schema = self.__class__.get_scheme(self.__class__)()
+
+        dump_result = schema.dump(self)
+        return dump_result.data
