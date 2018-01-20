@@ -1,5 +1,5 @@
-from flask_restful import Api, Resource, reqparse
-from flask import abort
+from flask import abort, request
+from flask_restful import Api, Resource
 
 
 class BaseModelView(Resource):
@@ -10,8 +10,8 @@ class BaseModelView(Resource):
         api.add_resource(cls, *url)
 
     def __init__(self, model_cls):
-        self.manager = model_cls.manager()
-        self.parser = reqparse.RequestParser()
+        self.model_cls = model_cls
+        self.manager = self.model_cls.manager()
 
     def get(self,  **kwargs):
         if kwargs:
@@ -36,12 +36,16 @@ class BaseModelView(Resource):
         return serialized_items
 
     def put(self, **kwargs):
-        args = self.parser.parse_args(**kwargs)
-        return self.manager.save(args['item'])
+        data = request.json[self.field_name]
+        item = self.model_cls(**data)
+        saved_instance = self.manager.save(item, **kwargs)
+        return saved_instance.serialize()
 
     def post(self, **kwargs):
-        args = self.parser.parse_args()
-        return self.manager.save(args['item'], **kwargs)
+        data = request.json[self.field_name]
+        item = self.model_cls(**data)
+        saved_instance = self.manager.save(item, **kwargs)
+        return saved_instance.serialize()
 
     def delete(self, **kwargs):
         return self.manager.delete(**kwargs)

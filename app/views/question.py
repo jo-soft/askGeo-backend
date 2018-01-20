@@ -15,3 +15,4 @@ class QuestionList(BaseModelView):
 
     def __init__(self):
         super().__init__(QuestionModel)
+        self.field_name = "question"

@@ -4,6 +4,7 @@ from models.model_base import ModelBase
 
 
 class QuestionModel(ModelBase):
+
     @classmethod
     def get_scheme(cls, class_to_create=None):
         class_to_create = class_to_create or cls
@@ -16,6 +17,5 @@ class QuestionModel(ModelBase):
 
         return QuestionSchema
 
-    def __init__(self,
-                 **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)

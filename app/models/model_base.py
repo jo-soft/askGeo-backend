@@ -1,8 +1,35 @@
+from bson import ObjectId
 from flask_restful import Resource
 from marshmallow import Schema, fields, post_load
 from marshmallow.utils import _Missing
 
 from models.db import get_db
+
+
+def hex_to_int(num_as_hex_str):
+    return int(num_as_hex_str, 16)
+
+
+def id_Obj_to_int(id_obj):
+    return hex_to_int(id_obj.binary.hex())
+
+
+class TableModificationFaildError(ValueError):
+    pass
+
+
+class InsertFailedError(TableModificationFaildError):
+    def __init__(self, table, item, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.table = table
+        self.item = item
+
+
+class UpdateFailedError(TableModificationFaildError):
+    def __init__(self, table, item, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.table = table
+        self.item = item
 
 
 class Manager(object):
@@ -23,18 +50,37 @@ class Manager(object):
             return None
 
     def get(self, filter_data, **kwargs):
-        raw_data = self.db_table.find(filter_data, **kwargs)
-        return map(lambda data: self.content_class(data), raw_data)
+        raw_data = self.db_table.find(filter_data, show_record_id=True, **kwargs)
+        return map(lambda data: self.content_class(**data), raw_data)
 
     def save(self, item):
-        update_data_with_operator = {"$set": item.serialize()}
-        upsert_result = self.db_table.update_one({'_id': item._id}, update=update_data_with_operator, upsert=True)
-        if upsert_result.upserted_id:
-            hex_id = upsert_result.upserted_id.binary.hex()
-            item._id = hex_id
+        if item.is_new():
+            return self._save(item)
         else:
-            pass
-            # maybe throw an error?
+            return self._update(item)
+
+    def _save(self, item):
+        data = item.serialize(exclude=['_id'])
+        insert_result = self.db_table.insert_one(data)
+
+        if not insert_result.inserted_id:
+            raise InsertFailedError(self.db_table, item)
+
+        hex_id = insert_result.inserted_id.binary.hex()
+        item._id = hex_to_int(hex_id)
+
+        return item
+
+    def _update(self, item):
+        data = item.serialize()
+        update_data_with_operator = {"$set": data}
+        update_result = self.db_table.update_one({'_id': item._id}, update=update_data_with_operator, upsert=True)
+
+        if not update_result.affected_rows:
+            raise UpdateFailedError(self.db_table, item)
+
+        hex_id = update_result.upserted_id.binary.hex()
+        item._id = hex_to_int(hex_id)
         return item
 
     def delete(self, item):
@@ -65,7 +111,9 @@ class ModelBase(Resource):
     def __init__(self, **kwargs):
         super().__init__()
 
-        # iterate
+        self._set_id(kwargs.get('_id'))
+
+        # iterate over all fields from schema and read values from kwargs to self.
         for field_name, field in self.__class__.get_scheme(self.__class__)._declared_fields.items():
             try:
                 getattr(self, field_name)
@@ -73,19 +121,29 @@ class ModelBase(Resource):
                 val = kwargs.get(field_name)
                 if val is None:
                     if field.allow_none:
-                        if not isinstance(field.default, _Missing):
-                            val = field.default
-                    else:
-                        raise AttributeError(field_name)
+                        continue
+                    elif not isinstance(field.default, _Missing):
+                        val = field.default
+
+                if val is None:
+                    raise AttributeError(field_name)
                 setattr(self, field_name, val)
+
+    def _set_id(self, _id):
+        if isinstance(_id, ObjectId):
+            self._id = id_Obj_to_int(_id)
+        else:
+            self._id = _id
 
     def deleted(self, val=None):
         if val is not None:
             self._deleted_ = val
         return self._deleted_
 
-    def serialize(self):
-        schema = self.__class__.get_scheme(self.__class__)()
+    def is_new(self):
+        return self._id is None
 
+    def serialize(self, exclude=[]):
+        schema = self.__class__.get_scheme(self.__class__)(exclude=exclude)
         dump_result = schema.dump(self)
         return dump_result.data
