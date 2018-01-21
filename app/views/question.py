@@ -8,7 +8,7 @@ questions_bp.record(lambda _: register())
 
 
 def register():
-    QuestionList.register(questions_bp, '/questions/', '/questions/<_id>')
+    QuestionList.register(questions_bp, '/questions/', '/questions/<int:_id>')
 
 
 class QuestionList(BaseModelView):

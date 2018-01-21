@@ -1,12 +1,24 @@
-2
+class DatabaseError(ValueError):
+    pass
 
 
-class LoadError(ValueError):
+class SerializationError(ValueError):
+    pass
+
+
+class LoadError(SerializationError):
     def __init__(self, errors):
         self.errors = errors
 
 
-class TableModificationFailedError(ValueError):
+class NotFoundError(DatabaseError):
+    def __init__(self, table, _id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.table = table
+        self._id = _id
+
+
+class TableModificationFailedError(DatabaseError):
     pass
 
 
@@ -22,3 +34,10 @@ class UpdateFailedError(TableModificationFailedError):
         super().__init__(*args, **kwargs)
         self.table = table
         self.item = item
+
+
+class DeletionFailedException(TableModificationFailedError):
+    def __init__(self, table, _id, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.table = table
+        self._id = _id
