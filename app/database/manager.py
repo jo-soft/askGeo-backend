@@ -26,7 +26,7 @@ class Manager(object):
     def get_one(self, filter_data, **kwargs):
         raw_data = self.db_table.find_one(filter_data, **kwargs)
         if not raw_data:
-            raise NotFoundError(self.db_table, _id)
+            raise NotFoundError(self.db_table, filter_data)
         return self._load(raw_data)
 
     def get(self, filter_data, **kwargs):

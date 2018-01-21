@@ -16,6 +16,3 @@ class QuestionModel(ModelBase):
             score = fields.Integer(default=0)
 
         return QuestionSchema
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
