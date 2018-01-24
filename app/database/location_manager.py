@@ -4,10 +4,10 @@ from database.manager import Manager
 
 
 class LocationManager(Manager):
-    def __init__(self, location_field="loc", *args, **kwargs):
-        super.__init__(*args, **kwargs)
-        self.location_field = location_field
-        self.db_table.createIndex([
+    def __init__(self, content_class, location_field="loc", *args, **kwargs):
+        super().__init__(content_class, *args, **kwargs)
+        self.lo1cation_field = location_field
+        self.db_table.create_index([
             (location_field, GEO2D)
         ])
 
@@ -30,7 +30,7 @@ class LocationManager(Manager):
         )
         return super().get(filter_data, **kwargs)
 
-    def get_near(self, location, dist, additional_filter_data={}, min_dist=0, **kwargs):
+    def get_near(self, location, max_distance, additional_filter_data={}, min_dist=0, **kwargs):
         filter_data = self._build_filter_data(
             additional_filter_data,
             {
@@ -39,7 +39,7 @@ class LocationManager(Manager):
                         "type": "Point",
                         "coordinates": [location.longitude, location.latitude]
                     },
-                    "$maxDistance": dist,
+                    "$maxDistance": max_distance,
                     "$minDistance": min_dist
                 }
             }

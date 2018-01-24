@@ -7,6 +7,9 @@ from views.decorators import requires_argument
 
 
 class BaseModelView(Resource):
+    default_filter_args = {
+        'deleted': False
+    }
 
     @classmethod
     def register(cls, app_or_blueprint, *url):
@@ -35,9 +38,7 @@ class BaseModelView(Resource):
             abort(404)
 
     def _get_list(self):
-        items = self.manager.get({
-            'deleted': False
-        })
+        items = self.manager.get(self.default_filter_args)
         serialized_items = [
             item.serialize() for item in
             items

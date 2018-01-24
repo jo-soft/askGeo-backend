@@ -1,9 +1,9 @@
 from marshmallow import fields
 
-from models.model_base import ModelBase
+from models.location_model import LocationBasedModel
 
 
-class QuestionModel(ModelBase):
+class QuestionModel(LocationBasedModel):
 
     @classmethod
     def get_scheme(cls, class_to_create=None):

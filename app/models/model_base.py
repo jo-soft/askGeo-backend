@@ -28,9 +28,8 @@ class ModelBase(Resource):
 
     def __init__(self, **kwargs):
         super().__init__()
-
         # iterate over all fields from schema and read values from kwargs to self.
-        for field_name, field in self.__class__.get_scheme()._declared_fields.items():
+        for field_name, field in self.get_scheme()().declared_fields.items():
             try:
                 getattr(self, field_name)
             except AttributeError:
@@ -54,6 +53,6 @@ class ModelBase(Resource):
         return self._id is None
 
     def serialize(self, exclude=[]):
-        schema = self.__class__.get_scheme()(exclude=exclude)
+        schema = self.get_scheme()(exclude=exclude)
         dump_result = schema.dump(self)
         return dump_result.data
