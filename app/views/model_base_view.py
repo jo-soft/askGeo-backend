@@ -17,8 +17,14 @@ class BaseModelView(Resource):
         api.add_resource(cls, *url)
 
     def __init__(self, model_cls):
-        self.model_cls = model_cls
-        self.manager = self.model_cls.manager()
+        self.model_schema = model_cls.get_scheme()()
+        self.manager = model_cls.manager()
+
+    def _load_model(self, data):
+        loaded = self.model_schema.load(data)
+        if loaded.errors:
+            raise ValueError(loaded.errors)
+        return loaded.data
 
     def get(self,  **kwargs):
         try:
@@ -47,14 +53,14 @@ class BaseModelView(Resource):
 
     def post(self):
         data = request.json[self.field_name]
-        item = self.model_cls(**data)
+        item = self._load_model(data)
         saved_instance = self.manager.save(item)
         return saved_instance.serialize(), 201
 
     @requires_argument()
     def put(self, **kwargs):
         data = request.json[self.field_name]
-        item = self.model_cls(**data)
+        item = self._load_model(data)
         item._id = int_to_id_obj(kwargs['_id'])
         try:
             saved_instance = self.manager.save(item)
