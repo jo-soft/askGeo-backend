@@ -2,7 +2,7 @@ from flask import abort, request
 from flask_restful import Api, Resource
 
 from database.exceptions import NotFoundError
-from database.utils import int_to_id_obj
+from database.utils import hex_str_to_id_obj
 from views.decorators import requires_argument
 
 
@@ -17,7 +17,7 @@ class BaseModelView(Resource):
         api.add_resource(cls, *url)
 
     def __init__(self, model_cls):
-        self.model_schema = model_cls.get_scheme()()
+        self.model_schema = model_cls.get_scheme_cls()()
         self.manager = model_cls.manager()
 
     def _load_model(self, data):
@@ -61,7 +61,7 @@ class BaseModelView(Resource):
     def put(self, **kwargs):
         data = request.json[self.field_name]
         item = self._load_model(data)
-        item._id = int_to_id_obj(kwargs['_id'])
+        item._id = hex_str_to_id_obj(kwargs['_id'])
         try:
             saved_instance = self.manager.save(item)
             return saved_instance.serialize()

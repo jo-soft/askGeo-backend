@@ -13,3 +13,12 @@ def id_obj_to_int(id_obj):
 def int_to_id_obj(_id):
     bytes_array = int.to_bytes(_id, BYTE_LENGTH, BYTE_ORDER)
     return ObjectId(bytes_array)
+
+
+def id_obj_to_hex_str(id_obj):
+    return id_obj.binary.hex()
+
+
+def hex_str_to_id_obj(hex_str):
+    id_as_int = int(hex_str, 16)
+    return int_to_id_obj(id_as_int)

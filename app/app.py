@@ -1,7 +1,8 @@
 from flask import Flask
 
 from models import db
-from views.question import questions_bp
+from views.answerView import answer_bp
+from views.questionView import questions_bp
 
 
 def read_config(app):
@@ -11,6 +12,7 @@ def read_config(app):
 
 def register_blueprints(app, prefix="/api"):
     app.register_blueprint(questions_bp, url_prefix=prefix)
+    app.register_blueprint(answer_bp, url_prefix=prefix)
     return app
 
 

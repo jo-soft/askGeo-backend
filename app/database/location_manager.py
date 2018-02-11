@@ -7,7 +7,7 @@ class LocationManager(Manager):
     def __init__(self, content_class, location_field="loc", *args, **kwargs):
         super().__init__(content_class, *args, **kwargs)
         self.location_field = location_field
-        self.db_table.create_index([
+        self.collection.create_index([
             (location_field, GEOSPHERE)
         ])
 
