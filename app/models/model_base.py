@@ -52,25 +52,25 @@ class ModelBase(Resource):
         fields_per_cls = [getattr(cls, 'fields', {}) for cls in reversed_classes]
 
         result = {}
-        for fields in fields_per_cls:
-            result.update(fields)
+        for _fields in fields_per_cls:
+            result.update(_fields)
         return result
 
     def _load_fields(self):
-        fields = self._get_fields()
-        for field_name, field in fields.items():
-            field.load(field_name, self)
+        _fields = self._get_fields()
+        for field_name, field in _fields.items():
+            field.load(field_name=field_name, obj=self)
 
     def _serialize_fields(self, exclude=[]):
-        fields = self._get_fields()
-        for field_name, field in fields.items():
+        _fields = self._get_fields()
+        for field_name, field in _fields.items():
             if field_name in exclude:
                 continue
             field.serialize(field_name=field_name, obj=self)
 
     def deleted(self, val=None):
         if val is not None:
-            self._deleted_ = val
+            self._deleted_ = bool(val)
         return self._deleted_
 
     def is_new(self):
