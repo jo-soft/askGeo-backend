@@ -1,3 +1,5 @@
+from copy import copy
+
 from database.exceptions import LoadError, InsertFailedError, UpdateFailedError, NotFoundError
 from database.utils import hex_str_to_id_obj, id_obj_to_hex_str
 from models.db import get_db
@@ -21,6 +23,7 @@ class Manager(object):
         return loaded.data
 
     def get_one_by_id(self, _id, filter_data={}, **kwargs):
+        filter_data = copy(filter_data)
         filter_data['_id'] = hex_str_to_id_obj(_id)
         return self.get_one(filter_data, **kwargs)
 
