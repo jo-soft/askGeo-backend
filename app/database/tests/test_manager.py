@@ -3,6 +3,8 @@ import unittest
 import unittest.mock as mock
 from copy import copy
 
+from marshmallow.fields import Field
+
 import models.model_base as model_base
 from database import manager, utils
 from database.exceptions import NotFoundError, InsertFailedError, UpdateFailedError
@@ -250,6 +252,12 @@ class TestExist(BaseManagerTest):
 
 
 class TestSaveForNewItems(BaseManagerTest):
+    class Model(model_base.ModelBase):
+
+        externalField = Field(external=True)
+        noneInternalField = Field(internal=False)
+        field = Field(allow_none=True)
+
     def setUp(self):
         super().setUp()
         self.some_id = random.randint(1, 10000)
@@ -261,6 +269,16 @@ class TestSaveForNewItems(BaseManagerTest):
 
         def side_effect(data):
             self.assertEqual(self.item_json, data)
+
+            self.assertFalse(
+                'field' in data
+            )
+            self.assertFalse(
+                'externalField' in data
+            )
+            self.assertFalse(
+                'noneInternalField' in data
+            )
 
             class InsertResultMock:
                 def __init__(self, inserted_int_id):
@@ -294,6 +312,11 @@ class TestSaveForNewItems(BaseManagerTest):
 
 
 class TestSaveForExistingItems(BaseManagerTest):
+    class Model(model_base.ModelBase):
+        externalField = Field(external=True)
+        noneInternalField = Field(internal=False)
+        field = Field(allow_none=True)
+
     def setUp(self):
         super().setUp()
         self.some_id = random.randint(1, 10000)
@@ -306,7 +329,19 @@ class TestSaveForExistingItems(BaseManagerTest):
         )
 
         def side_effect(filter_data, update):
+
             self.assertEqual(update, {"$set": self.item_json})
+
+            self.assertFalse(
+                'field' in update['$set']
+            )
+            self.assertFalse(
+                'externalField' in update['$set']
+            )
+            self.assertFalse(
+                'noneInternalField' in update['$set']
+            )
+
             self.assertEqual(filter_data, {"_id": int_to_id_obj(self.some_id)})
 
             class UpdateResultMock:

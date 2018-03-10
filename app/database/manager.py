@@ -49,9 +49,10 @@ class Manager(object):
 
     def _default_exclude_in_save_fn(self, field):
         meta = getattr(field, 'meta', {})
+        meta_data = getattr(field, 'metaData', {})
         # exclude all fields which are marked as external or not internal
-        is_external = meta.get('external', False)
-        is_internal = meta.get('internal', True)
+        is_external = meta.get('external', False) or meta_data.get('external', False)
+        is_internal = meta.get('internal', True) or meta_data.get('internal', True)
         return not is_internal or is_external
 
     def _save(self, item):
