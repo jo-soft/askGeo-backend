@@ -1,17 +1,6 @@
 from database.exceptions import NotFoundError
+from models.misc import CachedObj
 from models.model_fields import BaseModelField
-
-
-class CachedObj(object):
-    def __init__(self, creator_fn):
-        self.creator = creator_fn
-        self._val = None
-
-    @property
-    def value(self):
-        if not self._val:
-            self._val = self.creator()
-        return self._val
 
 
 class ReferenceTargetField(BaseModelField):

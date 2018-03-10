@@ -21,18 +21,6 @@ class _MissingValue(object):
     def __bool__(self): return False
 
 
-class CachedObj(object):
-    def __init__(self, creator_fn):
-        self.creator = creator_fn
-        self._val = None
-
-    @property
-    def value(self):
-        if not self._val:
-            self._val = self.creator()
-        return self._val
-
-
 class BaseModelField(object):
     def __init__(self, default=_MissingValue(), default_load=None,
                  attribute=None, load_from=None, dump_to=None,
