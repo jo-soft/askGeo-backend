@@ -40,7 +40,7 @@ class LocationManager(Manager):
                 "$near": {
                     "$geometry": {
                         "type": "Point",
-                        "coordinates": [location['longitude'], location['latitude']]
+                        "coordinates": [location.longitude, location.latitude]
                     },
                     "$maxDistance": max_distance,
                     "$minDistance": min_distance

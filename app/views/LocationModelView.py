@@ -1,6 +1,7 @@
 from flask import request, abort
 
 from database.exceptions import NotFoundError
+from models.geojsonp import Point
 from views.model_base_view import BaseModelView
 
 
@@ -27,10 +28,10 @@ class LocationModelView(BaseModelView):
         if self.is_nearby_request(kwargs):
             min_distance = float(query_params.get("min_distance")) if 'min_distance' in query_params else None
             return [model.serialize() for model in self.manager.get_near(
-                location={
-                    "longitude": float(query_params.get("longitude")),
-                    "latitude": float(query_params.get("latitude"))
-                },
+                location=Point([
+                    float(query_params.get("longitude")),
+                    float(query_params.get("latitude"))
+                ]),
                 max_distance=float(query_params.get("max_distance")),
                 min_distance=min_distance,
                 **kwargs
@@ -38,7 +39,7 @@ class LocationModelView(BaseModelView):
         elif self.is_within_request(kwargs):
             # todo: ensure vertices is an array of 2-tuples of int
             return [model.serialize() for model in self.manager.get_within(
-                vertices=query_params.vertices,
+                vertices=[Point(vertex) for vertex in query_params.vertices],
                 **kwargs
             )]
         elif self.is_single_item_request(kwargs):

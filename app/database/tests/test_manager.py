@@ -13,6 +13,7 @@ class BaseManagerTest(unittest.TestCase):
     class DbMock:
         def __init__(self):
             self.find_one = mock.MagicMock()
+            self.find = mock.MagicMock()
             self.insert_one = mock.MagicMock()
             self.update_one = mock.MagicMock()
 
