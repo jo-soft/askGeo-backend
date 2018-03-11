@@ -28,13 +28,13 @@ class ReferenceTargetField(BaseModelField):
         }):
             raise NotFoundError(self.target_cls.manager().collection, val)
 
-    def _serialize(self, value, attr, obj):
+    def _serialize(self, value, attr=None, obj=None):
         transformed_value = self.transform_value(value)
         if self.validate_exits:
             self._validate_exists(transformed_value)
         return transformed_value
 
-    def _load(self, value, attr, src_obj):
+    def _load(self, value, attr=None, src_obj=None):
         cached = CachedObj(
             lambda: next(iter(self.target_cls.manager().get({
                 self.target_field: value

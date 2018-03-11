@@ -38,10 +38,10 @@ class TestPoint(unittest.TestCase):
         self.point = Point([self.longitude, self.latitude])
 
     def test_constructor(self):
-        self.assertEquals(
+        self.assertEqual(
             self.point.longitude, self.longitude
         )
-        self.assertEquals(
+        self.assertEqual(
             self.point.latitude, self.latitude
         )
 
