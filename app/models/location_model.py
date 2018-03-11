@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, post_load, pre_dump
+from marshmallow import Schema, fields, post_load, pre_dump, ValidationError
 
 from database.location_manager import LocationManager
 from database.schema_fields import TupleField
@@ -9,7 +9,8 @@ from models.model_base import ModelBase
 class LocationSchema(Schema):
     type = fields.String(required=True)
     coordinates = TupleField(
-        (fields.Number(required=True), fields.Number(required=True))
+        (fields.Number(required=True), fields.Number(required=True)),
+        required=True
     )
 
     @pre_dump
@@ -18,7 +19,15 @@ class LocationSchema(Schema):
 
     @post_load
     def make_instance(self, data):
-        return locationEntityFactory.create(data['type'], data['coordinates'])
+        try:
+            entity_class = locationEntityFactory.get_class(data['type'])
+        except Exception as ex:
+            raise ValidationError(message=ex, data=data, field_names='type')
+
+        try:
+            return entity_class(data['coordinates'])
+        except Exception as ex:
+            raise ValidationError(message=ex, data=data, field_names='coordinates')
 
 
 class LocationBasedModel(ModelBase):
