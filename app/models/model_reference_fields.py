@@ -67,14 +67,15 @@ class ReferenceField(BaseModelField):
         if filter_conditions:
             self.filter_conditions = filter_conditions
         else:
-            self.reference_field = reference_field
-            id_getter = lambda data: getattr(data, '_id')
-            self.reference_getter = reference_getter or id_getter
+            id_field_name = '_id'
+            self.reference_field = reference_field or id_field_name
+            id_getter = lambda data: getattr(data, id_field_name)
+            reference_getter = reference_getter or id_getter
             self.filter_conditions = {
-                reference_field: self.reference_getter
+                self.reference_field: reference_getter
             }
-            self.cache = cache
-            self.cached = {}
+        self.cache = cache
+        self.cached = {}
 
     def _get_concrete_conditions(self, obj):
         return {
@@ -93,7 +94,7 @@ class ReferenceField(BaseModelField):
                 return obj
         return self.cached[cache_key]
 
-    def _serialize(self, cached_value, attr, obj):
+    def _serialize(self, cached_value, attr=None, obj=None):
         if not self.single_value_condition:
             return [
                 _value.serialize() for _value in cached_value.value

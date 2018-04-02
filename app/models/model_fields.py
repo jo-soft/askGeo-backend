@@ -95,8 +95,10 @@ class BaseModelField(object):
         target = self.dump_to or field_name
         setattr(obj, target, serialized)
 
-    def load(self, field_name, obj):
+    def load(self, obj, field_name=None):
         src = self.load_from or field_name
+        if not src:
+            raise ValueError("either fieldname or self.load_from has to be defined")
         val = getattr(obj, src, self.default_load)
 
         if self.many:
