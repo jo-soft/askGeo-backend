@@ -5,8 +5,8 @@ from views.answerView import answer_bp
 from views.questionView import questions_bp
 
 
-def read_config(app):
-    app.config.from_object('config_dev.Config')
+def read_config(app, config_path='config_dev.Config'):
+    app.config.from_object(config_path)
     return app
 
 
@@ -20,9 +20,9 @@ def init_db(app):
     db.init_app(app)
 
 
-def factory():
+def factory(config_path=None):
     app = Flask(__name__)
-    read_config(app)
+    read_config(app, config_path)
 
     init_db(app)
     register_blueprints(app)

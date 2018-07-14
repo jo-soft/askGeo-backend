@@ -1,5 +1,6 @@
 import random
 import unittest
+from unittest import mock
 
 from database.location_manager import LocationManager
 from models.geojsonp import Point
@@ -7,6 +8,14 @@ from models.location_model import LocationBasedModel
 
 
 class TestManager(unittest.TestCase):
+
+    def setUp(self):
+        self.patcher = mock.patch('database.manager.get_db')
+        self.get_db_mock = self.patcher.start()
+
+    def tearDown(self):
+        self.patcher.stop()
+
     def test_creates_manager_for_class(self):
         class TestCls(LocationBasedModel):
             pass

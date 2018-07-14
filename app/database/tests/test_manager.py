@@ -24,9 +24,12 @@ class BaseManagerTest(unittest.TestCase):
 
     def setUp(self):
         db_mock = self.DbMock()
-        manager.get_db = mock.MagicMock(return_Value=db_mock)
-
+        self.patcher = mock.patch('database.manager.get_db')
+        self.get_db_mock = self.patcher.start()
         self.manager = self.Model.manager()
+
+    def tearDown(self):
+        self.patcher.stop()
 
 
 class TestGetOneById(BaseManagerTest):
