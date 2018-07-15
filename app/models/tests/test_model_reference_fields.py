@@ -178,6 +178,32 @@ class TestReferenceFieldSerialize(ReferenceFieldBase):
             serialized_values
         )
 
+    def test_calls_serialize_on_item_if_no_cached_item(self):
+        field = ReferenceField(
+            target_cls=lambda: self.modelMockCls,
+        )
+
+        class SerializableMock:
+            def __init__(self, serialized):
+                self.serialized = serialized
+
+            def serialize(self):
+                return self.serialized
+
+        serialized_values = [
+            random.randint(0, 100),
+            random.randint(0, 100)
+        ]
+
+        result = [
+            SerializableMock(serialized_val) for serialized_val in serialized_values
+        ]
+
+        self.assertEqual(
+            field._serialize(result),
+            serialized_values
+        )
+
 
 class TestReferenceFieldLoadWithoutCache(ReferenceFieldBase):
     def test_returns_matching_val_from_manager(self):

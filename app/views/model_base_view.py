@@ -52,14 +52,14 @@ class BaseModelView(Resource):
         return serialized_items
 
     def post(self):
-        data = request.json[self.field_name]
+        data = request.get_json()[self.field_name]
         item = self._load_model(data)
         saved_instance = self.manager.save(item)
         return saved_instance.serialize(), 201
 
     @requires_argument()
     def put(self, **kwargs):
-        data = request.json[self.field_name]
+        data = request.get_json()[self.field_name]
         item = self._load_model(data)
         item._id = hex_str_to_id_obj(kwargs['_id'])
         try:

@@ -1,6 +1,6 @@
 import unittest.mock as mock
 import unittest
-import app
+from app import App
 
 
 class BaseTest(unittest.TestCase):
@@ -10,8 +10,7 @@ class BaseTest(unittest.TestCase):
         self.db_mock = self.init_db_patcher.start()
         self.get_db_patcher = mock.patch('database.manager.get_db')
         self.get_db_mock = self.get_db_patcher.start()
-        self.app = app.factory('config_test.Config')
-        self.app = self.app.test_client()
+        self.app = App.test_client()
 
     def tearDown(self):
         self.init_db_patcher.stop()

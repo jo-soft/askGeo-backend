@@ -29,6 +29,6 @@ def factory(config_path=None):
     return app
 
 
+App = factory()
 if __name__ == "__main__":
-    app = factory()
-    app.run(host="0.0.0.0")
+    App.run(host="0.0.0.0")

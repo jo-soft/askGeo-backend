@@ -58,7 +58,6 @@ class Manager(object):
     def _save(self, item):
         data = item.serialize(exclude=['_id'], field_filter_fn=self._default_exclude_in_save_fn)
         insert_result = self.collection.insert_one(data)
-
         if not insert_result.inserted_id:
             raise InsertFailedError(self.collection, item)
         item._id = id_obj_to_hex_str(insert_result.inserted_id)

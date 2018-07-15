@@ -95,8 +95,9 @@ class ReferenceField(BaseModelField):
         return self.cached[cache_key]
 
     def _serialize(self, cached_value, attr=None, obj=None):
+        value = getattr(cached_value, 'value', cached_value)
         if not self.single_value_condition:
             return [
-                _value.serialize() for _value in cached_value.value
+                _value.serialize() for _value in value
             ]
-        return cached_value.value.serialize()
+        return value.serialize()
